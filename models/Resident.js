@@ -15,8 +15,8 @@ const ResidentSchema = new mongoose.Schema(
 		adress: { street: String, yardnumber: String, cipcode: Number, city: String, country: String },
 		image_path: String,
 		moreinfo: String,
-		Activities: [{activityId: { type: ObjectId, ref: 'Activity' }, activityName:{type: String}, date: {type: Date}}],
-		group: {number: {type: Number}, subdivision: {type: String}},
+		Activities: [{activityId: { type: ObjectId, ref: 'Activity' }, activityDate: {type: Date}}],
+		group: {identificator: {type: String}, subdivision: {type: String}},
 	},
 	{ timestamps: true }
 );
