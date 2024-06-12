@@ -6,18 +6,13 @@ const UserSchema = new mongoose.Schema(
 		firstname: { type: String, required: [true, 'Firstname are required'] },
 		lastname: { type: String, required: [true, 'Lastname are required'] },
 		email: { type: String, required: [true, 'Username are required'], unique: true },
-		emailConfirmed: Boolean,
+		telephonnumber:{type: Number, require:[true, 'Telephonnumber are required']},
 		password: { type: String, required: true },
 		birthday: { type: Date, required: true },
 		role: String,
-		location: String,
-		role: String,
 		image_path: String,
-		CommentIds: [{
-		type: ObjectId,
-		ref: 'Comment'
-		}],
-		tokens: [],
+		conections: [{token:{type: String}, date: {timestamps:true}}],
+		CommentIds: [{type: ObjectId, ref: 'Comment'}],
 	},
 	{ timestamps: true }
 );
