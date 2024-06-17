@@ -14,9 +14,9 @@ app.use(express.json());
 
 app.use('/public', express.static(path.join(__dirname, 'public')));
 
-// app.use('/users', require('./routes/users.js'));
+app.use('/users', require('./routes/users.js'));
 app.use('/residents', require('./routes/residents.js'));
-app.use('/activities', require('./routes/activities.js'));
+app.use('/activities', require('./routes/activity.js'));
 
 // app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(docs));
 

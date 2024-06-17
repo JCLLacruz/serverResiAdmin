@@ -1,4 +1,5 @@
 const Activity = require('../models/Activity');
+const User = require('../models/User');
 
 const ActivityController = {
 	async createActivity(req, res) {
@@ -11,7 +12,8 @@ const ActivityController = {
 	},
 	async updateActivity(req, res) {
 		try {
-			const activity = await Activity.findOneAndUpdate({ _id: req.params._id }, req.body, { new: true });
+            console.log(req.params._id);
+			const activity = await Activity.findOneAndUpdate({ _id: req.params._id }, {...req.body, UserId: req.user._id}, { new: true });
 			res.send({ msg: 'Activity updated in database', activity });
 		} catch (error) {
 			console.error(error);
