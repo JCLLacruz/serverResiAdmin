@@ -30,7 +30,7 @@ const UserController = {
 			res.status(500).send({ msg: 'Server error', error });
 		}
 	},
-    async confirmEmailUser(req, res) {
+	async confirmEmailUser(req, res) {
 		try {
 			const emailToken = req.params.emailToken;
 			const payload = jwt.verify(emailToken, JWT_SECRET);
@@ -87,7 +87,7 @@ const UserController = {
 			res.status(500).send({ msg: 'Server error', error });
 		}
 	},
-    async findUserById(req, res) {
+	async findUserById(req, res) {
 		try {
 			const user = await User.findOne({ _id: req.params._id });
 			res.send({ msg: `User with id: ${req.params._id} was found.`, user });
@@ -98,11 +98,11 @@ const UserController = {
 	},
 	async findUserByFirstname(req, res) {
 		try {
-            if (req.params.firstname.length > 20){
-				return res.status(400).send('Search to long.')
+			if (req.params.firstname.length > 20) {
+				return res.status(400).send('Search to long.');
 			}
 			const firstname = new RegExp(req.params.firstname, 'i');
-			const user = await User.find({firstname});
+			const user = await User.find({ firstname });
 			res.send({ msg: `The user or users contains ${req.params.firstname} in his firstname`, user });
 		} catch (error) {
 			console.error(error);
@@ -112,12 +112,50 @@ const UserController = {
 	async logout(req, res) {
 		try {
 			const user = await User.findOne({ _id: req.user._id });
-            user.connections.forEach(connection => connection.token === req.headers.authorization && (connection.token = ''));
-            await user.save();
+			user.connections.forEach((connection) => connection.token === req.headers.authorization && (connection.token = ''));
+			await user.save();
 			res.send({ msg: 'User logged out', user });
 		} catch (error) {
 			console.error(error);
 			res.status(500).send({ msg: `User not logged out properly.`, error });
+		}
+	},
+	async userInfo(req, res) {
+		try {
+			const user = await User.findById(req.user._id);
+			res.send({ msg: 'User info:', user });
+		} catch (error) {
+			console.error(error);
+			res.status(500).send({ msg: 'Server error', error });
+		}
+	},
+	async recoverPassword(req, res) {
+		try {
+			const recoverToken = jwt.sign({ email: req.params.email }, JWT_SECRET, {
+				expiresIn: '48h',
+			});
+			const url = API_URL + '/users/resetPassword/' + recoverToken;
+			await transporter.sendMail({
+				to: req.params.email,
+				subject: 'Recover password',
+				html: `<h3> Recover password </h3>
+	  <a href="${url}">Recover your password</a>
+	  You have only 48 hours to change the password with these email.`,
+			});
+			res.send({ msg: 'A recover email was sended to your email' });
+		} catch (error) {
+			console.error({ msg: 'Server error', error });
+		}
+	},
+	async resetPassword(req, res) {
+		try {
+			const recoverToken = req.params.recoverToken;
+			const payload = jwt.verify(recoverToken, JWT_SECRET);
+			const password = await bcrypt.hash(req.body.password, 10);
+			const user = await User.findOneAndUpdate({ email: payload.email }, { password }, { new: true });
+			res.send({ msg: 'Password was changed', user });
+		} catch (error) {
+			console.error({ msg: 'Server error', error });
 		}
 	},
 };
