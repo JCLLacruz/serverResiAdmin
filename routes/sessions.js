@@ -4,11 +4,9 @@ const { authentication } = require('../middleware/authentication.js');
 const { uploadResidentImages } = require('../middleware/multer.js');
 const SessionController = require('../controllers/SessionController.js');
 
-
-router.get('/', SessionController.allSessions);
-router.get('/id/:_id', SessionController.findSessionById);
-router.post('/', SessionController.createSession);
-router.delete('/id/:_id', SessionController.deleteSession);
-
+router.get('/', authentication, SessionController.allSessions);
+router.get('/id/:_id', authentication, SessionController.findSessionById);
+router.post('/', authentication, SessionController.createSession);
+router.delete('/id/:_id', authentication, SessionController.deleteSession);
 
 module.exports = router;
