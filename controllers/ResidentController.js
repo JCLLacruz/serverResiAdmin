@@ -23,7 +23,7 @@ const ResidentController = {
 				req.body.image_path = req.file.filename;
 			}
 			const resident = await Resident.findOneAndUpdate({ _id: req.params._id }, req.body, { new: true });
-			res.status(201).send({ msg: 'Resident updated in database', resident });
+			res.send({ msg: 'Resident updated in database', resident });
 		} catch (error) {
 			console.error(error);
 			res.status(500).send({ msg: 'Server error', error });
@@ -32,7 +32,7 @@ const ResidentController = {
 	async deleteResident(req, res) {
 		try {
 			const resident = await Resident.findByIdAndDelete({ _id: req.params._id });
-			res.status(201).send({ msg: 'Resident deleted from database', resident });
+			res.send({ msg: 'Resident deleted from database', resident });
 		} catch (error) {
 			console.error(error);
 			res.status(500).send({ msg: 'Server error', error });
@@ -41,7 +41,7 @@ const ResidentController = {
 	async allResidents(req, res) {
 		try {
 			const residents = await Resident.find().populate('Activities.activitiId');
-			res.status(201).send({ msg: 'All residents', residents });
+			res.send({ msg: 'All residents', residents });
 		} catch (error) {
 			console.error(error);
 			res.status(500).send({ msg: 'Server error', error });
@@ -53,7 +53,7 @@ const ResidentController = {
 			res.send({ msg: 'Resident by id was found.', resident });
 		} catch (error) {
 			console.error(error);
-			res.status(500).send({ msg: `The resident with this id does not exist in the database.`, error });
+			res.status(500).send({ msg: `Server error`, error });
 		}
 	},
 	async findResidentByName(req, res) {
@@ -66,7 +66,7 @@ const ResidentController = {
 			res.send({ msg: 'Resident by firstname was found.', resident });
 		} catch (error) {
 			console.error(error);
-			res.status(500).send({ msg: `The resident with this firstname does not exist in the database.`, error });
+			res.status(500).send({ msg: `Server error`, error });
 		}
 	},
 };
