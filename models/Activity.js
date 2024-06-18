@@ -5,9 +5,8 @@ const ActivitySchema = new mongoose.Schema(
 	{
 		title: { type: String, required: [true, 'Title for activity are required'], unique:true},
 		description: { type: String, required: [true, 'Description are required'] },
-		sesions: [{type: ObjectId, ref: 'Session'}],
+		sessions: [{type: ObjectId, ref: 'Session'}],
 		image_path: String,
-		UserId:{type: ObjectId, ref: 'User'},
 	},
 	{ timestamps: true }
 );

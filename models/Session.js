@@ -4,7 +4,7 @@ const ObjectId = mongoose.SchemaTypes.ObjectId;
 const SessionSchema = new mongoose.Schema(
 	{
 		activity: { type: ObjectId, ref: 'Activity'},
-		observations: { type: String, required: [true, 'bservations are required'] },
+		observations: { type: String, required: [true, 'Observations are required'] },
 		residentIds:[{type: ObjectId, ref: 'User'}],
 	},
 	{ timestamps: true }

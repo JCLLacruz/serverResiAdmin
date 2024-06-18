@@ -21,7 +21,7 @@ const ActivityController = {
 	},
     async allActivities(req, res) {
         try {
-            const activities = await Activity.find();
+            const activities = await Activity.find().populate('sessions');
             res.send({msg:'All activities', activities});
         } catch (error) {
             console.error(error);
