@@ -4,11 +4,13 @@ require('dotenv').config();
 const PORT = process.env.PORT || 3000;
 const { dbConnection } = require('./config/config.js');
 const path = require('path');
+const cors = require('cors');
 // const swaggerUI = require('swagger-ui-express');
 // const docs = require('./docs/index');
 // require('./crons/cleanupUsers.js');
 
 dbConnection();
+app.use(cors());
 
 app.use(express.json());
 
