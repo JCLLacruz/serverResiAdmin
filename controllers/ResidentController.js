@@ -40,7 +40,13 @@ const ResidentController = {
 	},
 	async allResidents(req, res) {
 		try {
-			const residents = await Resident.find().populate('Activities.activitiId');
+			const residents = await Resident.find().populate({
+                path: 'sessions',
+                populate: {
+                    path: 'activityId',
+                    model: 'Activity'
+                }
+            });
 			res.send({ msg: 'All residents', residents });
 		} catch (error) {
 			console.error(error);
@@ -49,7 +55,13 @@ const ResidentController = {
 	},
 	async findResidentById(req, res) {
 		try {
-			const resident = await Resident.findOne({ _id: req.params._id }).populate('Activities.activitiId');
+			const resident = await Resident.findOne({ _id: req.params._id }).populate({
+                path: 'sessions',
+                populate: {
+                    path: 'activityId',
+                    model: 'Activity'
+                }
+            });
 			res.send({ msg: 'Resident by id was found.', resident });
 		} catch (error) {
 			console.error(error);
@@ -62,7 +74,13 @@ const ResidentController = {
 				return res.status(400).send('Search to long.');
 			}
 			const firstname = new RegExp(req.params.firstname, 'i');
-			const resident = await Resident.find({ firstname }).populate('Activities.activitiId');
+			const resident = await Resident.find({ firstname }).populate({
+                path: 'sessions',
+                populate: {
+                    path: 'activityId',
+                    model: 'Activity'
+                }
+            });
 			res.send({ msg: 'Resident by firstname was found.', resident });
 		} catch (error) {
 			console.error(error);
