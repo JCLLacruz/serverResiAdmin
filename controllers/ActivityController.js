@@ -21,7 +21,13 @@ const ActivityController = {
 	},
     async allActivities(req, res) {
         try {
-            const activities = await Activity.find().populate('sessions');
+            const activities = await Activity.find().populate('sessions').populate({
+                path: 'sessions',
+                populate: {
+                    path: 'residentIds',
+                    model: 'Resident'
+                }
+            });
             res.send({msg:'All activities', activities});
         } catch (error) {
             console.error(error);
@@ -32,6 +38,21 @@ const ActivityController = {
         try {
             const activity = await Activity.findByIdAndDelete({_id: req.params._id});
             res.send({msg:'Activity deleted from database', activity});
+        } catch (error) {
+            console.error(error);
+            res.status(500).send({msg:'Server error', error});
+        }
+    },
+    async getActivityById (req, res) {
+        try {
+            const activity = await Activity.findById({_id: req.params._id}).populate('sessions').populate({
+                path: 'sessions',
+                populate: {
+                    path: 'residentIds',
+                    model: 'Resident'
+                }
+            });
+            res.send({msg:'Activity by id was found', activity});
         } catch (error) {
             console.error(error);
             res.status(500).send({msg:'Server error', error});
