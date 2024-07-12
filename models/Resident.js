@@ -12,7 +12,7 @@ const ResidentSchema = new mongoose.Schema(
 			phoneNumber: { type: String, required: [true, 'Phone number for emergencies are required'] },
 		},
 		birthday: { type: Date, required: true },
-		address: { street: String, yardnumber: String, zipcode: Number, city: String, country: String },
+		address: { street: String, yardnumber: String, zipcode: String, city: String, country: String },
 		image_path: String,
 		moreinfo: String,
 		sessions: [{sessionId: {type: ObjectId,ref: 'Session'}, activityId: { type: ObjectId, ref: 'Activity' }, sessionDate: {type: Date}}],
