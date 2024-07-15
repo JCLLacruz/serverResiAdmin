@@ -13,7 +13,7 @@ const ResidentSchema = new mongoose.Schema(
 		},
 		birthday: { type: Date, required: true },
 		address: { street: String, yardnumber: String, zipcode: String, city: String, country: String },
-		image_path: String,
+		images: [{ type: ObjectId, ref: 'Image' }],
 		moreinfo: String,
 		sessions: [{sessionId: {type: ObjectId,ref: 'Session'}, activityId: { type: ObjectId, ref: 'Activity' }, sessionDate: {type: Date}}],
 		group: {identificator: {type: String}, subdivision: {type: String}},

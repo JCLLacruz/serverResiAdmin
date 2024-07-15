@@ -6,6 +6,7 @@ const API_URL = process.env.API_URL;
 const JWT_SECRET = process.env.JWT_SECRET;
 
 const User = require('../models/User');
+const Image = require('../models/Image');
 
 const UserController = {
 	async createUser(req, res) {
@@ -61,7 +62,7 @@ const UserController = {
 	},
 	async allUsers(req, res) {
 		try {
-			const users = await User.find();
+			const users = await User.find().populate('images');
 			res.status(201).send({ msg: 'All users', users });
 		} catch (error) {
 			console.error(error);
@@ -89,7 +90,7 @@ const UserController = {
 	},
 	async findUserById(req, res) {
 		try {
-			const user = await User.findOne({ _id: req.params._id });
+			const user = await User.findOne({ _id: req.params._id }).populate('images');
 			res.send({ msg: `User with id: ${req.params._id} was found.`, user });
 		} catch (error) {
 			console.error(error);
@@ -102,7 +103,7 @@ const UserController = {
 				return res.status(400).send('Search to long.');
 			}
 			const firstname = new RegExp(req.params.firstname, 'i');
-			const user = await User.find({ firstname });
+			const user = await User.find({ firstname }).populate('images');
 			res.send({ msg: `The user or users contains ${req.params.firstname} in his firstname`, user });
 		} catch (error) {
 			console.error(error);
@@ -122,7 +123,7 @@ const UserController = {
 	},
 	async userInfo(req, res) {
 		try {
-			const user = await User.findById(req.user._id);
+			const user = await User.findById(req.user._id).populate('images');
 			res.send({ msg: 'User info:', user });
 		} catch (error) {
 			console.error(error);
