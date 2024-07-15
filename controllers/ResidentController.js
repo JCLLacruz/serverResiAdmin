@@ -1,4 +1,5 @@
 const Resident = require('../models/Resident');
+const Image = require('../models/Image');
 
 const ResidentController = {
 	async createResident(req, res) {

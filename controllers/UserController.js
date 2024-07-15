@@ -6,6 +6,7 @@ const API_URL = process.env.API_URL;
 const JWT_SECRET = process.env.JWT_SECRET;
 
 const User = require('../models/User');
+const Image = require('../models/Image');
 
 const UserController = {
 	async createUser(req, res) {
