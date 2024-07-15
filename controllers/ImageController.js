@@ -66,13 +66,13 @@ const ImageController = {
     async deleteImage(req, res) {
         try {
             const image = await Image.findByIdAndDelete({_id: req.params._id});
-            if(req.headers.Userid) {
-                const user = await User.findById(req.headers.Userid);
+            if(req.headers.userid) {
+                const user = await User.findById(req.headers.userid);
                 user.images = user.images.filter(img => img.toString() !== req.params._id);
                 await user.save();
             }
-            if(req.headers.Residentid) {
-                const resident = await Resident.findById(req.headers.Residentid);
+            if(req.headers.residentid) {
+                const resident = await Resident.findById(req.headers.residentid);
                 resident.images = resident.images.filter(img => img.toString() !== req.params._id);
                 await resident.save();
             }
