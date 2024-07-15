@@ -4,7 +4,8 @@ const ObjectId = mongoose.SchemaTypes.ObjectId;
 const ImageSchema = new mongoose.Schema({
     data: Buffer,
     contentType: String,
-    user: { type: ObjectId, ref: 'User' }
+    userId: { type: ObjectId, ref: 'User' },
+    residentId: { type: ObjectId, ref: 'Resident' }
   });
   
   const Image = mongoose.model('Image', ImageSchema);

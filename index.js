@@ -20,6 +20,7 @@ app.use('/users', require('./routes/users.js'));
 app.use('/residents', require('./routes/residents.js'));
 app.use('/activities', require('./routes/activities.js'));
 app.use('/sessions', require('./routes/sessions.js'));
+app.use('/images', require('./routes/images.js'));
 
 // app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(docs));
 
