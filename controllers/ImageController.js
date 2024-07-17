@@ -13,6 +13,7 @@ const ImageController = {
 				contentType: 'image/webp',
 				userId: req.body.userId,
 			});
+            
 
 			const user = await User.findById(req.body.userId);
 			if (user) {
@@ -36,13 +37,14 @@ const ImageController = {
 				residentId: req.body.residentId,
 			});
 
-			const resident = await Resident.findById(req.body.residentId);
+			const resident = await Resident.findById(req.body.residentId).populate('images');
 			if (resident) {
 				resident.images.push(image._id);
 				await resident.save();
 			}
+            const images = resident.images.length >= 1 ? [resident.images] : null;
 
-			res.status(200).send({ msg: 'Image uploaded and converted successfully', image });
+			res.status(200).send({ msg: 'Image uploaded and converted successfully', image, images});
 		} catch (error) {
 			console.error(error);
 			res.status(500).send('An error occurred while processing the image');
