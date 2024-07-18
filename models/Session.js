@@ -5,7 +5,7 @@ const SessionSchema = new mongoose.Schema(
 	{
 		activityId: { type: ObjectId, ref: 'Activity' },
 		observations: { type: String, required: [true, 'Observations are required'] },
-		residentIds: [{ type: ObjectId, ref: 'User' }],
+		residentIds: [{ type: ObjectId, ref: 'Resident' }],
 	},
 	{ timestamps: true }
 );
