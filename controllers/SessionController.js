@@ -6,12 +6,6 @@ const SessionController = {
 	async createSession(req, res) {
 		try {
 			let { activityId, observations, residentIds } = req.body;
-			if (typeof residentIds === 'string') {
-				residentIds = residentIds
-					.replace(/[\[\]']/g, '')
-					.split(',')
-					.map((id) => id.trim());
-			}
 			const session = await Session.create({ activityId, observations, residentIds });
 			await Activity.findByIdAndUpdate({ _id: activityId }, { $push: { sessions: session._id } });
 			residentIds.forEach(async (residentId) => {
@@ -60,6 +54,24 @@ const SessionController = {
 			res.status(500).send({ msg: 'Server error', error });
 		}
 	},
+	async findSessionsByResidentId(req, res) {
+		try {
+			const sessions = await Session.find({ residentIds: req.params._id }).populate('residentIds').populate('activityId');
+			res.send({ msg: 'Sessions by resident id were found', sessions });
+		} catch (error) {
+			console.error(error);
+			res.status(500).send({ msg: 'Server error', error });
+		}
+	},
+	async findSessionsByActivityId(req, res) {
+		try {
+			const sessions = await Session.find({ activityId: req.params._id }).populate('residentIds').populate('activityId');
+			res.send({ msg: 'Sessions by activity id were found', sessions });
+		} catch (error) {
+			console.error(error);
+			res.status(500).send({ msg: 'Server error', error });
+		}
+	}
 };
 
 module.exports = SessionController;
