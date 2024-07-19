@@ -27,7 +27,7 @@ const SessionController = {
             session.residentIds.forEach(async (residentId) => {
                 await Resident.findOneAndUpdate(
 					{ _id: residentId },
-					{ $pull: { sessions: { sessionId: session._id, activityId: session.activityId, sessionDate: session.createdAt } } }
+					{ $pull: { sessions: { sessionId: session._id} } }
 				);
             })
 			res.send({ msg: 'Session deleted from database', session });
