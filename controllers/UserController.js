@@ -44,7 +44,8 @@ const UserController = {
 	},
 	async updateUser(req, res) {
 		try {
-			const user = await User.findOneAndUpdate({ _id: req.params._id }, req.body, { new: true });
+			const {password, confirmPasswor,...userToUpdate} = req.body; 
+			const user = await User.findOneAndUpdate({ _id: req.params._id }, userToUpdate, { new: true });
 			res.status(201).send({ msg: 'User updated in database', user });
 		} catch (error) {
 			console.error(error);
@@ -81,7 +82,7 @@ const UserController = {
 			}
 			const token = jwt.sign({ _id: user._id }, JWT_SECRET);
 			user.connections.push({ token, date: new Date() });
-			await user.save();
+			await user.save({ validateBeforeSave: false });
 			res.send({ msg: `Welcome ${user.firstname}.`, user, token });
 		} catch (error) {
 			console.error(error);
@@ -114,7 +115,7 @@ const UserController = {
 		try {
 			const user = await User.findOne({ _id: req.user._id });
 			user.connections.forEach((connection) => connection.token === req.headers.authorization && (connection.token = ''));
-			await user.save();
+			await user.save({ validateBeforeSave: false });
 			res.send({ msg: 'User logged out', user });
 		} catch (error) {
 			console.error(error);
