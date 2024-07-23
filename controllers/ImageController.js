@@ -18,7 +18,7 @@ const ImageController = {
 			const user = await User.findById(req.body.userId);
 			if (user) {
 				user.images.push(image._id);
-				await user.save();
+				await user.save({ validateBeforeSave: false });
 			}
 
 			res.status(200).send({ msg: 'Image uploaded and converted successfully', image });
@@ -40,9 +40,9 @@ const ImageController = {
 			const resident = await Resident.findById(req.body.residentId).populate('images');
 			if (resident) {
 				resident.images.push(image._id);
-				await resident.save();
+				await resident.save({ validateBeforeSave: false });
 			}
-            const images = resident.images.length >= 1 ? [resident.images] : null;
+            const images = resident.images.length >= 1 ? [...resident.images] : [];
 
 			res.status(200).send({ msg: 'Image uploaded and converted successfully', image, images});
 		} catch (error) {
@@ -71,12 +71,12 @@ const ImageController = {
             if(req.headers.userid) {
                 const user = await User.findById(req.headers.userid);
                 user.images = user.images.filter(img => img.toString() !== req.params._id);
-                await user.save();
+                await user.save({ validateBeforeSave: false });
             }
             if(req.headers.residentid) {
                 const resident = await Resident.findById(req.headers.residentid);
                 resident.images = resident.images.filter(img => img.toString() !== req.params._id);
-                await resident.save();
+                await resident.save({ validateBeforeSave: false });
             }
             res.send({msg:'Image deleted from database', image});
         } catch (error) {
