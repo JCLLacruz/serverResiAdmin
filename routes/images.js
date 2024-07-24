@@ -1,4 +1,3 @@
-// routes/imageRoutes.js
 const express = require('express');
 const ImageController = require('../controllers/ImageController');
 const multer = require('multer');
