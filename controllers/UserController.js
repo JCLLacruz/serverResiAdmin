@@ -72,7 +72,7 @@ const UserController = {
 	},
 	async login(req, res) {
 		try {
-			const user = await User.findOne({ email: req.body.email });
+			const user = await User.findOne({ email: req.body.email }).populate('images');
 			if (!user) {
 				return res.status(400).send({ msg: 'Email or password are wrong.' });
 			}
