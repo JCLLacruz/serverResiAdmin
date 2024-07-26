@@ -16,6 +16,7 @@ const ResidentSchema = new mongoose.Schema(
 		images: [{ type: ObjectId, ref: 'Image' }],
 		moreinfo: String,
 		sessions: [{sessionId: {type: ObjectId,ref: 'Session'}, activityId: { type: ObjectId, ref: 'Activity' }, sessionDate: {type: Date}}],
+		attendance: [{attend: {type: Boolean}}],
 		group: {identificator: {type: String}, subdivision: {type: String}},
 	},
 	{ timestamps: true }
