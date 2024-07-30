@@ -9,6 +9,7 @@ router.get('/id/:_id', authentication, ResidentController.findResidentById);
 router.get('/firstname/:firstname', authentication, ResidentController.findResidentByName);
 router.post('/', authentication, uploadResidentImages.single('image_path'), ResidentController.createResident);
 router.put('/id/:_id', authentication, uploadResidentImages.single('image_path'), ResidentController.updateResident);
+router.put('/updateattendance', authentication, ResidentController.updateAttendance);
 router.delete('/id/:_id', authentication, ResidentController.deleteResident);
 
 module.exports = router;

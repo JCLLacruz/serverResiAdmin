@@ -41,13 +41,15 @@ const ResidentController = {
 	},
 	async allResidents(req, res) {
 		try {
-			const residents = await Resident.find().populate({
-                path: 'sessions',
-                populate: {
-                    path: 'activityId',
-                    model: 'Activity'
-                }
-            }).populate('images');
+			const residents = await Resident.find()
+				.populate({
+					path: 'sessions',
+					populate: {
+						path: 'activityId',
+						model: 'Activity',
+					},
+				})
+				.populate('images');
 			res.send({ msg: 'All residents', residents });
 		} catch (error) {
 			console.error(error);
@@ -56,13 +58,15 @@ const ResidentController = {
 	},
 	async findResidentById(req, res) {
 		try {
-			const resident = await Resident.findOne({ _id: req.params._id }).populate({
-                path: 'sessions',
-                populate: {
-                    path: 'activityId',
-                    model: 'Activity'
-                }
-            }).populate('images');
+			const resident = await Resident.findOne({ _id: req.params._id })
+				.populate({
+					path: 'sessions',
+					populate: {
+						path: 'activityId',
+						model: 'Activity',
+					},
+				})
+				.populate('images');
 			res.send({ msg: 'Resident by id was found.', resident });
 		} catch (error) {
 			console.error(error);
@@ -75,14 +79,49 @@ const ResidentController = {
 				return res.status(400).send('Search to long.');
 			}
 			const firstname = new RegExp(req.params.firstname, 'i');
-			const resident = await Resident.find({ firstname }).populate({
-                path: 'sessions',
-                populate: {
-                    path: 'activityId',
-                    model: 'Activity'
-                }
-            }).populate('images');
+			const resident = await Resident.find({ firstname })
+				.populate({
+					path: 'sessions',
+					populate: {
+						path: 'activityId',
+						model: 'Activity',
+					},
+				})
+				.populate('images');
 			res.send({ msg: 'Resident by firstname was found.', resident });
+		} catch (error) {
+			console.error(error);
+			res.status(500).send({ msg: `Server error`, error });
+		}
+	},
+	async updateAttendance(req, res) {
+		try {
+			const residentIds = req.body.residentIds;
+			const date = req.body.date;
+			const dateExist = await Resident.find({ 'attendance.date': date });
+			if (dateExist.length > 0) {
+				await Resident.updateMany(
+					{ _id: { $in: residentIds }, 'attendance.date': date },
+					{ $set: { 'attendance.$[elem].attend': false } },
+					{ arrayFilters: [{ 'elem.date': date }] }
+				);
+				await Resident.updateMany(
+					{ _id: { $nin: residentIds }, 'attendance.date': date },
+					{ $set: { 'attendance.$[elem].attend': false } },
+					{ arrayFilters: [{ 'elem.date': date }] }
+				);
+				return res.send({ msg: 'Attendance updated in all residents' });
+			} else {
+				await Resident.updateMany(
+					{ _id: { $in: residentIds } },
+					{ $push: { attendance: { attend: false, date } } }
+				);
+				await Resident.updateMany(
+					{ _id: { $nin: residentIds } },
+					{ $push: { attendance: { attend: true, date } } }
+				);
+				return res.send({ msg: 'Attendance updated in all residents' });
+			}
 		} catch (error) {
 			console.error(error);
 			res.status(500).send({ msg: `Server error`, error });
