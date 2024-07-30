@@ -105,7 +105,6 @@ const createSessions = async (activities, residents) => {
     const minSessions = 20; // Mínimo de 20 sesiones en total
 
     let totalSessions = 0;
-    const sessionDates = new Set();
 
     // Crear sesiones en fechas aleatorias
     while (totalSessions < maxSessions || totalSessions < minSessions) {
@@ -120,12 +119,13 @@ const createSessions = async (activities, residents) => {
                 sessionResidents.push(randomResident._id);
             }
         }
+
         // Crear la sesión con fecha predeterminada
         const session = new Session({
             activityId: activity._id,
             observations: faker.lorem.sentence(),
             residentIds: sessionResidents,
-            createdAt: randomDate.toISOString()
+            createdAt: randomDate
         });
 
         // Guardar la sesión en la base de datos
@@ -133,17 +133,23 @@ const createSessions = async (activities, residents) => {
         sessions.push(session);
         totalSessions += 1;
 
-        // Actualizar las sesiones en los residentes
-        for (const residentId of sessionResidents) {
+        // Actualizar las sesiones en los residentes y asistencia
+        await Promise.all(sessionResidents.map(async (residentId) => {
             const resident = await Resident.findById(residentId);
             if (resident) {
+                // Agregar la sesión al residente
                 resident.sessions.push({
                     sessionId: session._id,
-                    activityId: activity._id,
+                    activityId: activity._id
+                });
+                // Agregar la asistencia del día
+                resident.attendance.push({
+                    attend: true,
+                    date: randomDate
                 });
                 await resident.save();
             }
-        }
+        }));
 
         // Actualizar el documento de Activity para incluir la sesión
         const activityDoc = await Activity.findById(activity._id);
@@ -151,9 +157,42 @@ const createSessions = async (activities, residents) => {
             activityDoc.sessions.push(session._id);
             await activityDoc.save();
         }
+    }
 
-        // Añadir la fecha de la sesión a un conjunto de fechas para actualizaciones posteriores
-        sessionDates.add(randomDate.toISOString());
+    // Asegurarnos de que todos los residentes tengan una entrada en `attendance`
+    for (const resident of residents) {
+        const attendanceDates = [];
+        let currentDate = new Date(startDate);
+
+        while (currentDate <= endDate) {
+            if (!isWeekend(currentDate)) {
+                attendanceDates.push(new Date(currentDate)); // Añadir la fecha como objeto Date
+            }
+            currentDate = new Date(currentDate.getTime() + 24 * 60 * 60 * 1000); // Siguiente día
+        }
+
+        // Generar asistencia para cada fecha del mes
+        const attendanceRecords = attendanceDates.map(date => ({
+            date: date,
+            attend: false // Por defecto, se asume que el residente no asistió al centro
+        }));
+
+        // Actualizar asistencia con sesiones
+        for (const record of attendanceRecords) {
+            const sessionOnDate = sessions.find(session => {
+                return session.createdAt.toISOString().split('T')[0] === record.date.toISOString().split('T')[0]
+                    && session.residentIds.includes(resident._id);
+            });
+
+            if (sessionOnDate) {
+                record.attend = true;
+            }
+        }
+
+        await Resident.updateOne(
+            { _id: resident._id },
+            { $set: { attendance: attendanceRecords } }
+        );
     }
 
     return sessions;

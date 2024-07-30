@@ -9,7 +9,6 @@ const DocumentController = {
             const { month, year, identificator, subdivision } = req.body;
             const startDate = new Date(year, month - 1, 1);
             const endDate = new Date(year, month, 1);
-            const daysInMonth = new Date(year, month, 0).getDate();
 
             // Fetch session and resident data
             const sessions = await Session.find({
@@ -43,9 +42,93 @@ const DocumentController = {
 
             // Create document definition
             const docDefinition = {
-                pageOrientation: 'landscape',
                 pageSize: 'A4',
-                content: [
+                pageOrientation: 'landscape',
+                content: [],
+                defaultStyle: {
+                    font: 'Roboto',
+                    fontSize: 10,
+                },
+            };
+
+            // Create a page for each activity
+            const uniqueActivities = [...new Set(sessions.map(session => session.activityId.title))];
+            
+            uniqueActivities.forEach(activityTitle => {
+                const activitySessions = sessions.filter(session => session.activityId.title === activityTitle);
+                const body = [];
+                
+                // Get the days of the month
+                const daysInMonth = new Date(year, month, 0).getDate();
+                const allDays = Array.from({ length: daysInMonth }, (_, i) => i + 1);
+                
+                // Add table header
+                body.push([
+                    { text: 'Nombre', bold: true },
+                    ...allDays.map(day => day.toString())
+                ]);
+                
+                // Add resident rows
+                residents.forEach(resident => {
+                    const row = [
+                        { text: `${resident.firstname} ${resident.lastname}` }
+                    ];
+
+                    // Determine attendance for each day of the month
+                    for (let day of allDays) {
+                        const date = new Date(year, month - 1, day);
+                        const sessionForDay = activitySessions.find(
+                            session => new Date(session.createdAt).getDate() === day
+                        );
+
+                        const attendanceRecord = resident.attendance.find(
+                            record => new Date(record.date).getDate() === day
+                        );
+
+                        // Check if it's a weekend
+                        const isWeekend = date.getDay() === 0 || date.getDay() === 6;
+
+                        if (isWeekend) {
+                            // Keep weekend cells empty
+                            row.push({ text: '', fillColor: '#d3d3d3' });
+                        } else if (attendanceRecord && attendanceRecord.attend) {
+                            // Resident attended the center
+                            if (sessionForDay && sessionForDay.residentIds.some(id => id.equals(resident._id))) {
+                                // Resident attended the session
+                                row.push({
+                                    text: 'B',
+                                    color: 'blue',
+                                    fillColor: null
+                                });
+                            } else {
+                                // Resident attended the center but no session
+                                row.push({
+                                    text: '',
+                                    fillColor: null
+                                });
+                            }
+                        } else {
+                            // Resident did not attend the center
+                            row.push({
+                                text: 'X',
+                                color: 'red',
+                                fillColor: null
+                            });
+                        }
+                    }
+                    body.push(row);
+                });
+
+                // Add empty rows if needed
+                for (let i = 0; i < (25 - residents.length); i++) {
+                    body.push([
+                        { text: ' ' },
+                        ...allDays.map(() => ({ text: '' }))
+                    ]);
+                }
+
+                // Add page for each activity
+                docDefinition.content.push(
                     {
                         columns: [
                             { width: '*', text: '' }, // empty column to take up the remaining space
@@ -69,56 +152,21 @@ const DocumentController = {
                                     paddingBottom: () => 2
                                 }
                             }
-                        ]
+                        ],
+                        margin: [0, 0, 0, 10] // Add some margin below the header table
                     },
-                    { text: ' ' }, // Spacer
                     {
                         columns: [
-                            { text: 'CONTROL DE ACTIVIDAD', bold: true },
-                            { text: `GRUPO: ${groupName}`, bold: true, alignment: 'right' }
+                            { text: 'CONTROL DE ACTIVIDAD', style: 'header', bold: true },
+                            { text: `PROGRAMA: ${activityTitle}`, style: 'header', bold: true },
+                            { text: `GRUPO: ${groupName}`, style: 'header', bold: true, alignment: 'right' }
                         ]
                     },
-                    { text: ' ' }, // Spacer
                     {
                         table: {
-                            headerRows: 2,
-                            widths: [100, ...Array.from({ length: daysInMonth }, () => 15)], // Adjust column widths here
-                            body: [
-                                [
-                                    { text: '', border: [false, false, false, false] }, 
-                                    ...Array.from({ length: daysInMonth }, (_, i) => {
-                                        const day = i + 1;
-                                        const sessionForDay = sessions.find(
-                                            (session) => new Date(session.createdAt).getDate() === day
-                                        );
-                                        const activityTitle = sessionForDay ? sessionForDay.activityId.title : '';
-                                        return { text: activityTitle.split('').join('\n'), bold: true, alignment: 'center', fontSize: 6 };
-                                    })
-                                ],
-                                [{ text: 'Nombre', bold: true}, ...Array.from({ length: daysInMonth }, (_, i) => (i + 1).toString())],
-                                ...residents.map((resident) => [
-                                    { text: `${resident.firstname} ${resident.lastname}` },
-                                    ...Array.from({ length: daysInMonth }, (_, i) => {
-                                        const day = i + 1;
-                                        const date = new Date(year, month - 1, day);
-                                        const sessionForDay = sessions.find(
-                                            (session) => new Date(session.createdAt).getDate() === day && session.residentIds.some((id) => id.equals(resident._id))
-                                        );
-                                        const isWeekend = date.getDay() === 0 || date.getDay() === 6;
-                                        return sessionForDay
-                                            ? { text: 'B', color: 'blue', fillColor: isWeekend ? '#d3d3d3' : null }
-                                            : { text: isWeekend ? '' : 'X', color: 'red', fillColor: isWeekend ? '#d3d3d3' : null }; // No 'X' on weekends
-                                    }),
-                                ]),
-                                ...Array.from({ length: 25 - residents.length }, () => [
-                                    { text: ' ' }, ...Array.from({ length: daysInMonth }, (_, i) => {
-                                        const day = i + 1;
-                                        const date = new Date(year, month - 1, day);
-                                        const isWeekend = date.getDay() === 0 || date.getDay() === 6;
-                                        return { text: '', fillColor: isWeekend ? '#d3d3d3' : null };
-                                    })
-                                ])
-                            ],
+                            headerRows: 1,
+                            widths: [100, ...allDays.map(() => 13)],
+                            body
                         },
                         layout: {
                             hLineWidth: (i, node) => (i === 1 || i === node.table.body.length) ? 1 : 0.5,
@@ -131,13 +179,9 @@ const DocumentController = {
                             paddingBottom: () => 2
                         }
                     },
-                ],
-                defaultStyle: {
-                    font: 'Roboto',
-                    fontSize: 6,
-                },
-            };
-            
+                    { text: ' ', pageBreak: 'after' } // Page break after each activity
+                );
+            });
 
             // Generate PDF
             const pdfDoc = printer.createPdfKitDocument(docDefinition);
@@ -149,7 +193,7 @@ const DocumentController = {
             console.error('Error generating PDF:', error);
             res.status(500).send('An error occurred while processing the document');
         }
-    },
+    }
 };
 
 module.exports = DocumentController;
