@@ -21,7 +21,7 @@ const ImageController = {
 				await user.save({ validateBeforeSave: false });
 			}
 
-			res.status(200).send({ msg: 'Image uploaded and converted successfully', image });
+			res.status(200).send({ msg: 'Image uploaded and converted successfully', image, user });
 		} catch (error) {
 			console.error(error);
 			res.status(500).send('An error occurred while processing the image');
@@ -44,7 +44,7 @@ const ImageController = {
 			}
             const images = resident.images.length >= 1 ? [...resident.images] : [];
 
-			res.status(200).send({ msg: 'Image uploaded and converted successfully', image, images});
+			res.status(200).send({ msg: 'Image uploaded and converted successfully', image, images, resident});
 		} catch (error) {
 			console.error(error);
 			res.status(500).send('An error occurred while processing the image');
@@ -59,7 +59,7 @@ const ImageController = {
 			}
 
 			res.set('Content-Type', image.contentType);
-			res.send(image.data);
+			res.send({msg:'Image finded', image});
 		} catch (error) {
 			console.error(error);
 			res.status(500).send('An error occurred while retrieving the image');
