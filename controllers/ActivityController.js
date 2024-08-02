@@ -63,7 +63,7 @@ const ActivityController = {
 						path: 'residentIds',
 						model: 'Resident',
 					},
-				});
+				})
 			res.send({ msg: 'Activity by id was found', activity });
 		} catch (error) {
 			console.error(error);

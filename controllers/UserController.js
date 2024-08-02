@@ -45,7 +45,7 @@ const UserController = {
 	async updateUser(req, res) {
 		try {
 			const {password, confirmPasswor,...userToUpdate} = req.body; 
-			const user = await User.findOneAndUpdate({ _id: req.params._id }, userToUpdate, { new: true });
+			const user = await User.findOneAndUpdate({ _id: req.params._id }, userToUpdate, { new: true }).populate('images');
 			res.status(201).send({ msg: 'User updated in database', user });
 		} catch (error) {
 			console.error(error);

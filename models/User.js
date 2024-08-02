@@ -11,6 +11,7 @@ const UserSchema = new mongoose.Schema(
 		password: { type: String, required: true },
 		birthday: { type: Date, required: true },
 		role: { type: String, default: 'user' },
+		jobPosition: { type: String, required: true },
 		images: [{ type: ObjectId, ref: 'Image' }],
 		connections: [{token:{type: String}, date: {type: Date, default: Date.now}}],
 		CommentIds: [{type: ObjectId, ref: 'Comment'}],
