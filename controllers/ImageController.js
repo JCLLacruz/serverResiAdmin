@@ -81,8 +81,6 @@ const ImageController = {
 				image = resident.images[resident.images.length - 1];
 				await resident.save({ validateBeforeSave: false });
 			}
-			console.log(images);
-
 			res.send({ msg: 'Image deleted from database', image, images });
 		} catch (error) {
 			console.error(error);
