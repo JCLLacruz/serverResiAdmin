@@ -13,7 +13,6 @@ const ImageController = {
 				contentType: 'image/webp',
 				userId: req.body.userId,
 			});
-            
 
 			const user = await User.findById(req.body.userId);
 			if (user) {
@@ -42,9 +41,9 @@ const ImageController = {
 				resident.images.push(image._id);
 				await resident.save({ validateBeforeSave: false });
 			}
-            const images = resident.images.length >= 1 ? [...resident.images] : [];
+			const images = resident.images.length >= 1 ? [...resident.images] : [];
 
-			res.status(200).send({ msg: 'Image uploaded and converted successfully', image, images, resident});
+			res.status(200).send({ msg: 'Image uploaded and converted successfully', image, images, resident });
 		} catch (error) {
 			console.error(error);
 			res.status(500).send('An error occurred while processing the image');
@@ -59,34 +58,37 @@ const ImageController = {
 			}
 
 			res.set('Content-Type', image.contentType);
-			res.send({msg:'Image finded', image});
+			res.send({ msg: 'Image finded', image });
 		} catch (error) {
 			console.error(error);
 			res.status(500).send('An error occurred while retrieving the image');
 		}
 	},
-    async deleteImage(req, res) {
-        try {
+	async deleteImage(req, res) {
+		try {
+			await Image.findByIdAndDelete({ _id: req.params._id });
 			let images;
-            const image = await Image.findByIdAndDelete({_id: req.params._id});
-            if(req.headers.userid) {
-                const user = await User.findById(req.headers.userid);
-                user.images = user.images.filter(img => img.toString() !== req.params._id);
-				images = user.images.length >= 1 ? [...user.images] : [];
-                await user.save({ validateBeforeSave: false });
-            }
-            if(req.headers.residentid) {
-                const resident = await Resident.findById(req.headers.residentid);
-                resident.images = resident.images.filter(img => img.toString() !== req.params._id);
-				images = resident.images.length >= 1 ? [...resident.images] : [];
-                await resident.save({ validateBeforeSave: false });
-            }
-            res.send({msg:'Image deleted from database', image, images});
-        } catch (error) {
-            console.error(error);
-            res.status(500).send({msg:'Server error', error});
-        }
-    }
+			let image;
+			if (req.headers.userid) {
+				const user = await User.findById(req.headers.userid).populate('images');
+				images = user.images;
+				image = user.images[user.images.length - 1];
+				await user.save({ validateBeforeSave: false });
+			}
+			if (req.headers.residentid) {
+				const resident = await Resident.findById(req.headers.residentid).populate('images');
+				images = resident.images;
+				image = resident.images[resident.images.length - 1];
+				await resident.save({ validateBeforeSave: false });
+			}
+			console.log(images);
+
+			res.send({ msg: 'Image deleted from database', image, images });
+		} catch (error) {
+			console.error(error);
+			res.status(500).send({ msg: 'Server error', error });
+		}
+	},
 };
 
 module.exports = ImageController;
